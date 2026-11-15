@@ -12,6 +12,12 @@ const objects = [
 ];
 
 describe("picoSearch", () => {
+  it("searches cities containing expanding lowercase characters", () => {
+    const cities = [{ name: "İstanbul" }, { name: "London" }];
+    expect(picoSearch(cities, "l", ["name"])).toEqual([cities[1], cities[0]]);
+    expect(picoSearch(cities, "istanbul", ["name"])).toEqual([cities[0]]);
+  });
+
   it("should return all objects if searchTerm is empty", () => {
     expect(picoSearch(objects, "", ["name"])).toEqual(objects);
   });
