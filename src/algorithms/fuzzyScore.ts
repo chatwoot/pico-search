@@ -33,6 +33,19 @@ export default function fuzzyScore(target: string, pattern: string): number {
   }
   startPos++; // startPos was decremented one extra time
 
+  // Lowercasing can expand a character (İ → i + combining dot). Translate
+  // word boundaries to lowercase offsets rather than indexing the original
+  // target with offsets from the longer string.
+  let boundaries: Set<number> | undefined;
+  if (tLower.length !== target.length) {
+    boundaries = new Set();
+    let offset = 0;
+    for (let i = 0; i < target.length; i++) {
+      if (isBoundary(target, i)) boundaries.add(offset);
+      offset += target[i].toLowerCase().length;
+    }
+  }
+
   // Score the window [startPos..endPos]
   let score = 0;
   let consecutive = 0;
@@ -44,7 +57,7 @@ export default function fuzzyScore(target: string, pattern: string): number {
       score += consecutive;
 
       if (ti === 0) score += 2;
-      else if (isBoundary(target, ti)) score += 1.5;
+      else if (boundaries ? boundaries.has(ti) : isBoundary(target, ti)) score += 1.5;
 
       pi++;
     } else {

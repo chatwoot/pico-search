@@ -2,6 +2,21 @@ import { describe, expect, it } from "vitest";
 import fuzzyScore from "../../src/algorithms/fuzzyScore";
 
 describe("fuzzyScore", () => {
+  it.each(["l", "istanbul", "İstanbul"])("matches %s through an expanded lowercase character", (pattern) => {
+    const score = fuzzyScore("İstanbul", pattern);
+    expect(score).toBeGreaterThan(0);
+    expect(score).toBeLessThanOrEqual(1);
+  });
+
+  it.each(["İ-bar", "İBar", "İİ-bar"])("preserves word boundaries after lowercase expansion in %s", (target) => {
+    const plain = target.replaceAll("İ", "X");
+    expect(fuzzyScore(target, "b")).toBe(fuzzyScore(plain, "b"));
+  });
+
+  it("does not turn a character after a boundary into another boundary", () => {
+    expect(fuzzyScore("İ-bar", "a")).toBe(fuzzyScore("X-bar", "a"));
+  });
+
   it("exact match → 1", () => {
     expect(fuzzyScore("hello", "hello")).toBe(1);
     expect(fuzzyScore("Hello", "hello")).toBe(1);
